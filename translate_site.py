@@ -2,11 +2,14 @@ import requests
 import os
 from bs4 import BeautifulSoup
 from docx import Document
+from dotenv import load_dotenv
 
-subscription_key = "your_subscription_key"
-endpoint = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
-location = "eastus2"
-target_language = "pt-br"
+# Load environment variables
+load_dotenv()
+subscription_key = os.getenv("AZURE_TRANSLATOR_KEY")
+endpoint = os.getenv("AZURE_TRANSLATOR_ENDPOINT")
+location = os.getenv("AZURE_TRANSLATOR_REGION")
+target_language = "en-us"
 
 def translator_text(text, target_language):
     headers = {
@@ -17,7 +20,7 @@ def translator_text(text, target_language):
     }
 
     body = [{ "text": text }]
-    params = { "from": "en", "to": target_language }
+    params = { "from": "pt-br", "to": target_language }
 
     response = requests.post(endpoint, params=params, headers=headers, json=body)
     result = response.json()
@@ -27,7 +30,6 @@ def translate_site(url, output_filename="translated_site.docx"):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
 
-  
     texts = [p.get_text() for p in soup.find_all("p")]
     translated_texts = [translator_text(t, target_language) for t in texts if t.strip()]
 
@@ -39,7 +41,6 @@ def translate_site(url, output_filename="translated_site.docx"):
     print(f"Translated site content saved as: {output_filename}")
     return output_filename
 
-
 if __name__ == "__main__":
     url = "https://marcos-couto.github.io/"
-    output_file = translate_site(url, "site_translation_pt-br.docx")
+    output_file = translate_site(url, "site_translation_en-us.docx")
